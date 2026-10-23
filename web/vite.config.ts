@@ -14,6 +14,6 @@ export default defineConfig({
 			adapter: adapter({ fallback: '200.html' })
 		})
 	],
-	// Entwicklung: API lokal mit `uv run python -m nexhub_api` (Port 8000)
+	// Entwicklung: API lokal mit `uv run python -m armory_api` (Port 8000)
 	server: { proxy: { '/api': 'http://127.0.0.1:8000' } }
 });

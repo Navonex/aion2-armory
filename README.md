@@ -76,6 +76,9 @@ npm run check
 | `web/src/routes/hub/armory/` | Seiten der Armory |
 | `web/src/routes/(public)/` | geteilte Links (`/v/…`, `/c/…`), Impressum, Datenschutz |
 
+Zum Einbauen in eine bestehende Homepage (Subdomain, iframe, Unterpfad, eigener Login oder nur die
+Daten per API) steht alles Nötige in `CLAUDE.md`.
+
 ## Hinweise
 
 - Die Daten kommen von den öffentlichen Charakterseiten der offiziellen AION-2-Website (NCSOFT) und von
