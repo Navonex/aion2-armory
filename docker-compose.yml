@@ -1,0 +1,13 @@
+# Start: docker compose up -d   (vorher .env.example nach .env kopieren und anpassen)
+services:
+  armory:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - armory-daten:/data
+
+volumes:
+  armory-daten:
