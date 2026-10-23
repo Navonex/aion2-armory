@@ -21,7 +21,7 @@ Entstanden als Teil von NexHub (Navonex und gamunex), hier als eigenständige Ko
 Voraussetzung: Docker mit Compose.
 
 ```bash
-git clone https://github.com/Navonex/aion2-armory.git
+unzip aion2-armory.zip    # oder: git clone …
 cd aion2-armory
 cp .env.example .env      # Passwort und Adresse eintragen
 docker compose up -d --build
@@ -30,12 +30,13 @@ docker compose up -d --build
 Dann im Browser `http://<server>:8000` öffnen. Die Daten liegen im Docker-Volume `armory-daten`
 (SQLite-Datei `armory.db`). Sichern: das Volume oder die Datei kopieren.
 
-Aktualisieren:
+Aktualisieren: neue Dateien drüberkopieren (oder `git pull`), dann
 
 ```bash
-git pull
 docker compose up -d --build
 ```
+
+Die Daten im Volume bleiben dabei erhalten.
 
 ## Einstellungen (`.env`)
 
