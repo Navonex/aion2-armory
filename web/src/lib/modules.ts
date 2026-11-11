@@ -4,9 +4,10 @@ import { addTexts } from '#lib/i18n.svelte.ts';
 import type { HubModule, NavItem } from '#lib/module.ts';
 import { CORE_TEXTS } from '#lib/texts.ts';
 import armory from '#modules/armory/module.ts';
+import bis from '#modules/bis/module.ts';
 import { TEXTS as PROFILE_TEXTS } from '#modules/logs/texts.ts';
 
-export const MODULES: HubModule[] = [armory];
+export const MODULES: HubModule[] = [armory, bis];
 
 addTexts(CORE_TEXTS);
 addTexts(PROFILE_TEXTS); // Texte der Profil-Ansicht (modules/logs/components)

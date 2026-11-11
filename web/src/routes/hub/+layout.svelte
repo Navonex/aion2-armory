@@ -67,7 +67,7 @@
 		display: grid;
 		grid-template-columns: 250px minmax(0, 1fr);
 		gap: 20px;
-		max-width: 1280px;
+		max-width: var(--page-width);
 		margin: 0 auto;
 		padding: 16px;
 		min-height: 100vh;
@@ -95,7 +95,7 @@
 		align-items: center;
 		gap: 12px;
 		padding: 10px 12px;
-		border-radius: 14px;
+		border-radius: var(--radius);
 		color: var(--dim);
 		text-decoration: none;
 		font-weight: 550;
@@ -106,13 +106,12 @@
 	}
 	.menu a:hover {
 		color: var(--text);
-		background: rgba(255, 255, 255, 0.06);
+		background: var(--fill);
 	}
 	.menu a.active {
 		color: var(--text);
-		background: rgba(255, 255, 255, 0.1);
+		background: var(--fill-strong);
 		border-color: var(--edge-soft);
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 	}
 	.menu a.active :global(svg) {
 		color: var(--accent);
@@ -169,7 +168,7 @@
 			align-items: center;
 			gap: 10px;
 			padding: 10px 12px;
-			border-radius: 20px;
+			border-radius: var(--radius);
 		}
 		.menu {
 			order: 3;

@@ -1,36 +1,27 @@
-// AION-2-Klassen: Namen auf Englisch und Deutsch, Farben und Symbole wie im Meter (A2Tools-DPS-Meter,
-// public/src/js/core.js jobColorMap; Symbole in hub/web/static/klassen/, Herkunft in data/HERKUNFT.md).
+// AION-2-Klassen aus nexproto (proto/nexproto/classes.py): Namen, Farben wie im Meter; Symbole in
+// hub/web/static/klassen/, Figuren in hub/web/static/klassen/figur/ (für Faustkämpfer gibt es noch keine);
+// Herkunft in data/HERKUNFT.md.
 import { i18n } from '#lib/i18n.svelte.ts';
+import { CLASSES, UNKNOWN_CLASS_COLOR } from '#lib/nexproto.ts';
 
-export type ClassInfo = { label: string; color: string; icon: string };
+export type ClassInfo = { label: string; color: string; icon: string; figure: string };
 
-const CLASSES: Record<string, { en: string; de: string; color: string }> = {
-	gladiator: { en: 'Gladiator', de: 'Gladiator', color: '#4FD1C5' },
-	templar: { en: 'Templar', de: 'Templer', color: '#5F8CFF' },
-	assassin: { en: 'Assassin', de: 'Assassine', color: '#7BE35A' },
-	ranger: { en: 'Ranger', de: 'Waldläufer', color: '#41D98A' },
-	sorcerer: { en: 'Sorcerer', de: 'Magier', color: '#9A6BFF' },
-	spiritmaster: { en: 'Spiritmaster', de: 'Beschwörer', color: '#E06BFF' },
-	cleric: { en: 'Cleric', de: 'Kleriker', color: '#F2C15A' },
-	chanter: { en: 'Chanter', de: 'Kantor', color: '#FF9A3D' },
-	brawler: { en: 'Brawler', de: 'Faustkämpfer', color: '#E85D5D' }
-};
+const BY_KEY = new Map(CLASSES.map((c) => [c.key, c]));
 
 /** alle Klassen, z. B. für eine Auswahlliste */
-export const CLASS_KEYS = Object.keys(CLASSES);
-
-const UNKNOWN = '#8a90a3';
+export const CLASS_KEYS = CLASSES.map((c) => c.key);
 
 export function classInfo(cls: string | null | undefined): ClassInfo | null {
-	const c = cls ? CLASSES[cls] : undefined;
-	return c ? { label: c[i18n.lang], color: c.color, icon: `/klassen/${cls}.png` } : null;
+	const c = cls ? BY_KEY.get(cls) : undefined;
+	if (!c) return null;
+	return { label: c[i18n.lang], color: c.color, icon: `/klassen/${cls}.png`, figure: `/klassen/figur/${cls}.webp` };
 }
 
 /** Klasse zum Klassennamen, wie die AION-2-Website ihn schreibt (Englisch oder Deutsch). */
 export function classFromName(name: string | null | undefined): string | null {
 	const n = name?.trim().toLowerCase();
 	if (!n) return null;
-	return Object.keys(CLASSES).find((k) => CLASSES[k].en.toLowerCase() === n || CLASSES[k].de.toLowerCase() === n) ?? null;
+	return CLASSES.find((c) => c.en.toLowerCase() === n || c.de.toLowerCase() === n)?.key ?? null;
 }
 
-export const classColor = (cls: string | null | undefined) => (cls && CLASSES[cls]?.color) || UNKNOWN;
+export const classColor = (cls: string | null | undefined) => (cls && BY_KEY.get(cls)?.color) || UNKNOWN_CLASS_COLOR;

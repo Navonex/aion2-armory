@@ -86,7 +86,9 @@ export type Fight = {
 	run_players: string[];
 	players: FightPlayer[];
 	timeline: { bucket_ms: number; players: { actor: number; damage: number[] }[] } | null;
-	deaths: { name: string; t_ms: number; revived_ms: number | null }[];
+	/** skill, warning, lead_ms: Ursache vom Radar im NexBoard (analysis._with_cause), sonst null */
+	deaths: { name: string; t_ms: number; revived_ms: number | null; skill: number | null; warning: string | null;
+		lead_ms: number | null }[];
 	target: number | null;
 	buffs: Buff[];
 };
@@ -122,7 +124,8 @@ export type CharacterItem = {
 	detail?: ItemDetail | null;
 };
 
-export type ItemStat = { name: string; value: string; extra?: string | null };
+/** exceed: Wert aus dem Durchbruch (im Spiel orange unter den Grundwerten) */
+export type ItemStat = { name: string; value: string; extra?: string | null; exceed?: boolean };
 
 export type ItemDetail = {
 	level: number | null;
@@ -135,6 +138,12 @@ export type ItemDetail = {
 	godstones: { name: string; desc: string | null; grade: string | null; icon: string | null }[];
 	/** verstärkte Skills (Schmuck, Arkana) */
 	skills: { name: string; level: number; icon: string | null }[];
+	/** Seelenbindungsrate in Prozent ("100"), falls bekannt */
+	soul_bind_rate?: string | null;
+	/** höchste Verzauberung des Gegenstands */
+	max_enchant?: number | null;
+	/** was die Grundwerte bei höchster Verzauberung mehr hätten; fehlt = schon ganz oben */
+	gain?: { enchant: number; stats: ItemStat[] } | null;
 	/** nur Arkana */
 	set?: { name: string; equipped: number; total: number; bonuses: { degree: number; lines: string[] }[] };
 };
@@ -153,7 +162,12 @@ export type CharacterData = {
 		image: string | null;
 	};
 	stats: { type: string; name: string; value: number; effects: string[] }[];
-	titles: { owned: number; total: number; equipped: { name: string; grade: string; category: string; effects: string[] }[] };
+	titles: {
+		owned: number;
+		total: number;
+		/** owned/total/collection: Sammlung der Titelgruppe (ältere Momentaufnahmen haben sie nicht) */
+		equipped: { name: string; grade: string; category: string; effects: string[]; owned?: number; total?: number; collection?: string[] }[];
+	};
 	equipment: CharacterItem[];
 	pet: { name: string; level: number; icon: string | null } | null;
 	wing: { name: string; grade: string; enchant: number; icon: string | null } | null;

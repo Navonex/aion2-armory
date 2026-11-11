@@ -3,11 +3,13 @@
 Eine Armory für eure Gilde in AION 2: Charaktere eintragen, täglich von der offiziellen
 AION-2-Website abrufen und ansehen.
 
-- **Charakterprofil**: Kampfkraft, Ausrüstung mit Werten, Titel, Skills, Daevanion
+- **Charakterprofil wie im Spiel**: Skills, Werte-Kreis mit zusammengezählten Effekten, Ausrüstung mit allen
+  Werten (Durchbruch, Seelenbindung, Manasteine, Gottstein, Set), Titel, Daevanion, Arkana
 - **Verlauf**: Kampfkraft und Gegenstandsstufe pro Tag
-- **Vergleich**: zwei Charaktere nebeneinander, auch mit jemandem, der nicht eingetragen ist; als Link teilbar
-- **Build-Check**: ein Charakter gegen die 15 besten Spieler seiner Klasse (EU, ähnliche Kampfkraft,
-  Rangliste von [Abyss Logs](https://abysslogs.com)); als Link teilbar
+- **Bewertung**: jeder Gegenstand gegen das, was die Top-Spieler der Klasse tragen, mit Weg zu Best in Slot
+- **Vergleich**: zwei Charaktere nebeneinander mit Effekt-Summen und allem auf jedem Gegenstand, auch mit
+  jemandem, der nicht eingetragen ist; als Link teilbar
+- **BiS-Listen**: was die Top-Spieler je Klasse tragen und skillen, als Anteile
 - Deutsch und Englisch
 
 Es gibt kein Konto und keinen Login. Alle, die die Seite öffnen dürfen, sehen und pflegen dieselbe
@@ -21,7 +23,7 @@ Entstanden als Teil von NexHub (Navonex und gamunex), hier als eigenständige Ko
 Voraussetzung: Docker mit Compose.
 
 ```bash
-unzip aion2-armory.zip    # oder: git clone …
+git clone https://github.com/Navonex/aion2-armory.git   # oder die ZIP-Datei entpacken
 cd aion2-armory
 cp .env.example .env      # Passwort und Adresse eintragen
 docker compose up -d --build
@@ -47,6 +49,12 @@ Die Daten im Volume bleiben dabei erhalten.
 | `ARMORY_OPERATOR_NAME`, `…_ADDRESS`, `…_EMAIL`, `ARMORY_HOSTER` | Impressum und Datenschutz, nur nötig, wenn die Armory öffentlich im Internet steht. Anschrift mit `;` trennen. |
 | `DATABASE_URL` | Standard SQLite. Postgres geht auch: `postgresql+asyncpg://user:passwort@host/db` |
 
+Für Bewertung und BiS-Listen holt die Armory im Hintergrund laufend Daten: alle 5 Minuten ein paar
+Top-Spieler (Namen aus der Rangliste von [Abyss Logs](https://abysslogs.com), Ausrüstung von der
+AION-2-Website, Bestand höchstens 200 je Klasse, ohne Namen gespeichert) und einmal pro Woche je Gegenstand
+die Würfelbereiche von [MetaBot.GG](https://metabot.gg). Bis die ersten Klassen gesammelt sind, vergehen
+einige Stunden. `ARMORY_AION2_ENABLED=false` schaltet alle Abrufe ab.
+
 Steht die Armory im Internet, gehört HTTPS davor (z. B. Caddy oder ein anderer Reverse Proxy). Das
 Passwort wird sonst unverschlüsselt übertragen.
 
@@ -71,10 +79,11 @@ npm run check
 |---|---|
 | `api/armory_api/aion2.py` | Abruf von der offiziellen AION-2-Website |
 | `api/armory_api/armory.py` | eingetragene Charaktere, täglicher Abruf, Verlauf |
-| `api/armory_api/buildcheck.py`, `evaluation.py`, `abysslogs.py` | Build-Check |
+| `api/armory_api/bis_collector.py`, `bis_stats.py`, `abysslogs.py` | BiS-Listen: Top-Spieler sammeln und auswerten |
+| `api/armory_api/census.py`, `rating.py`, `metabot.py`, `ratgeber.py` | Bewertung der Ausrüstung gegen die Top-Spieler |
 | `api/armory_api/routes/` | API (`/api/armory/…`, öffentlich `/api/public/…`) |
-| `web/src/routes/hub/armory/` | Seiten der Armory |
-| `web/src/routes/(public)/` | geteilte Links (`/v/…`, `/c/…`), Impressum, Datenschutz |
+| `web/src/routes/hub/armory/`, `web/src/routes/hub/bis/` | Seiten der Armory und der BiS-Listen |
+| `web/src/routes/(public)/` | geteilte Vergleiche (`/v/…`), Impressum, Datenschutz |
 
 Zum Einbauen in eine bestehende Homepage (Subdomain, iframe, Unterpfad, eigener Login oder nur die
 Daten per API) steht alles Nötige in `CLAUDE.md`.
@@ -82,6 +91,6 @@ Daten per API) steht alles Nötige in `CLAUDE.md`.
 ## Hinweise
 
 - Die Daten kommen von den öffentlichen Charakterseiten der offiziellen AION-2-Website (NCSOFT) und von
-  Abyss Logs. Ändern die ihr Format, kann der Abruf ausfallen, bis der Code angepasst ist.
+  Abyss Logs, Würfelbereiche von MetaBot.GG. Ändern die ihr Format, kann der Abruf ausfallen, bis der Code angepasst ist.
 - Kein offizielles Projekt von NCSOFT. AION ist eine Marke von NCSOFT.
 - Lizenz: GPL-3.0-or-later (siehe `LICENSE`).

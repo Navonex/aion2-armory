@@ -1,7 +1,7 @@
 # AION 2 Armory – Hinweise für Claude Code
 
 Eigenständige Armory für eine AION-2-Gilde (Kopie aus dem Projekt NexHub). Charaktere werden von
-der offiziellen AION-2-Website (NCSOFT) abgerufen: Profil, Verlauf, Vergleich, Build-Check.
+der offiziellen AION-2-Website (NCSOFT) abgerufen: Profil, Verlauf, Vergleich, Bewertung gegen Top-Spieler, BiS-Listen.
 Nutzer-Doku: `README.md`. Sprache im Code und in Kommentaren: Deutsch.
 
 ## Aufbau
@@ -10,13 +10,19 @@ Nutzer-Doku: `README.md`. Sprache im Code und in Kommentaren: Deutsch.
   - `aion2.py`: Abruf der öffentlichen Charakterseiten (inoffizielle Endpunkte der Website, mit Pause
     zwischen Anfragen, `ARMORY_AION2_PAUSE`). Format der gespeicherten Daten steht dort.
   - `armory.py`: eingetragene Charaktere, täglicher Abruf (`Armory.daily`, läuft im Webserver-Prozess), Verlauf.
-  - `buildcheck.py`, `evaluation.py`, `abysslogs.py`: Build-Check gegen die Rangliste von Abyss Logs.
+  - `bis_collector.py`: sammelt im Hintergrund alle 5 Minuten ein paar Top-Spieler (Abyss Logs → NC-Suche →
+    Ausrüstung), höchstens 200 je Klasse, ohne Namen (SHA-256-Schlüssel); `bis_stats.py` rechnet die BiS-Listen
+    daraus, `routes/bis.py` liefert sie (`/api/bis`).
+  - `census.py` zählt aus demselben Bestand je Klasse die Zeilen der Seelenbindung, `metabot.py` holt
+    Würfelbereiche von MetaBot.GG, `rating.py` bewertet daraus jeden Gegenstand, `ratgeber.py` gibt Hinweise.
+  - `classes.py`: Klassentabelle, Gegenstück in `web/src/lib/nexproto.ts`.
   - `routes/armory.py`: API `/api/armory/…`; `routes/public.py`: `/api/public/…` (geteilte Links).
   - `deps.py`: **kein Login** – jede Anfrage läuft über ein festes Konto „Gilde“ (`db.prepare`).
   - `main.py`: App, optionales Passwort (`ARMORY_PASSWORT`, HTTP-Basic) und CSRF-Schutz (Origin-Prüfung),
     liefert außerdem die gebaute Oberfläche aus (`ARMORY_WEB_DIR`).
   - Tabellen legt der Start per `create_all` an (keine Migrationen). Bei Schemaänderungen an
     bestehenden Installationen braucht es dann eine Migration (z. B. Alembic nachrüsten).
+- Der Code ist eine Kopie aus NexHub (Stand 11.11.2026); Abweichungen: kein Login, keine Runs, kein Alembic.
 - `web/` – SvelteKit (Svelte 5, Runes), adapter-static, reine Browser-App (`ssr = false`).
   - Seiten: `src/routes/hub/armory/…`, geteilte Links `src/routes/(public)/v|c/[token]`.
   - Profil-Bausteine: `src/modules/logs/components/` (CharacterProfile, ItemCard, DaevanionBoard …).
@@ -59,7 +65,7 @@ Der Code geht davon aus, dass er **an der Wurzel einer eigenen Adresse** läuft:
    anderer Adresse als die Armory dafür CORS in `main.py` freigeben (`fastapi.middleware.cors`) und die
    Origin-Prüfung (`schutz`) entsprechend erweitern. Schnittstelle: `/api/docs` (OpenAPI).
 
-Unabhängig vom Weg: Geteilte Links (`/v/<token>`, `/c/<token>`, `/api/public/…`) müssen ohne Login
+Unabhängig vom Weg: Geteilte Links (`/v/<token>`, `/api/public/…`) müssen ohne Login
 erreichbar bleiben. Steht die Armory im Internet, gehören HTTPS sowie Impressum/Datenschutz dazu
 (`ARMORY_OPERATOR_*`, Seiten unter `src/routes/(public)/impressum|datenschutz`; die Datenschutzseite ist
 eine Vorlage, beim Einbau an die Homepage anpassen).

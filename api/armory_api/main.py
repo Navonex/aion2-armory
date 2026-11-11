@@ -16,7 +16,8 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from .aion2 import NC
 from .armory import Armory
-from .buildcheck import BuildChecker
+from .bis_collector import BisCollector
+from .census import Census
 from .config import Settings
 from .db import prepare
 from .deps import DB
@@ -26,7 +27,7 @@ log = logging.getLogger(__name__)
 
 SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
 # Ohne Passwort erreichbar: geteilte Links samt den Dateien, die ihre Seiten brauchen
-OFFEN = ("/api/public/", "/api/health", "/v/", "/c/", "/_app/", "/impressum", "/datenschutz",
+OFFEN = ("/api/public/", "/api/health", "/v/", "/_app/", "/impressum", "/datenschutz",
          "/favicon", "/robots.txt", "/klassen/")
 
 
@@ -41,13 +42,16 @@ def create_app(settings: Settings | None = None, http: httpx.AsyncClient | None 
         app.state.sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
         app.state.gilde_id = await prepare(engine, app.state.sessionmaker)
         app.state.http = http or httpx.AsyncClient(timeout=10)
-        app.state.armory, app.state.buildcheck, tasks = None, None, []
+        app.state.armory, tasks = None, []
         if settings.armory_aion2_enabled:
             nc = NC(app.state.http, settings.armory_aion2_pause)
             app.state.armory = Armory(app.state.sessionmaker, nc)
-            app.state.buildcheck = BuildChecker(app.state.sessionmaker, app.state.armory, app.state.http)
-            # täglicher Abruf aller Charaktere, läuft neben dem Webserver
-            tasks = [asyncio.create_task(app.state.armory.daily())]
+            census = Census(app.state.sessionmaker, app.state.http)
+            collector = BisCollector(app.state.sessionmaker, nc, app.state.http)
+            # der tägliche Armory-Abruf, der Sammler der BiS-Listen und die Zählung daraus; laufen neben dem Webserver
+            tasks = [asyncio.create_task(app.state.armory.daily()),
+                     asyncio.create_task(collector.run()),
+                     asyncio.create_task(census.daily())]
         if not settings.armory_passwort:
             log.warning("ARMORY_PASSWORT ist leer – jeder mit der Adresse kann die Armory öffnen")
         yield

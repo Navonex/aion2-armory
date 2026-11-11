@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
+from datetime import UTC, datetime
 
 from fastapi import Request
 from sqlalchemy import select
@@ -10,6 +11,11 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from .models import Base, User
 
 GILDE = "Gilde"
+
+
+def aware(when: datetime) -> datetime:
+    """SQLite gibt Zeitpunkte ohne Zeitzone zurück; gespeichert wird immer UTC."""
+    return when if when.tzinfo else when.replace(tzinfo=UTC)
 
 
 async def prepare(engine: AsyncEngine, sessionmaker: async_sessionmaker) -> int:

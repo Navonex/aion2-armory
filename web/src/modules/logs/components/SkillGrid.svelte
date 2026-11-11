@@ -1,10 +1,21 @@
 <!-- Skills wie im Spiel: Symbol mit Stufe, Schloss für nicht gelernte, „E“ für angelegte Stigmen,
-     Name darunter. Angelegt, aber nicht gelernt: gestrichelt rot. -->
+     Name darunter. Angelegt, aber nicht gelernt: gestrichelt rot. Die Stufe kommt so von NC: sie enthält
+     die Boni aus Daevanion und Ausrüstung schon (wie im Spiel und auf shugo.gg, höchstens 20). Die
+     BiS-Listen geben je Skill den Anteil der Top-Spieler mit (`share`), er steht unter dem Namen. -->
 <script lang="ts">
 	import { t } from '#lib/i18n.svelte.ts';
 	import type { CharacterData } from '../api.ts';
 
-	let { skills }: { skills: CharacterData['skills'] } = $props();
+	type Skill = CharacterData['skills'][number] & { share?: number };
+
+	let { data }: { data: { skills: Skill[] } } = $props();
+	const skills = $derived(data.skills);
+
+	function title(s: Skill): string {
+		const parts = [t('logs.char.level', { n: s.level })];
+		if (s.equipped && !s.learned) parts.push(t('logs.char.notLearned'));
+		return `${s.name} · ${parts.join(' – ')}`;
+	}
 
 	const groups = $derived([
 		{ key: 'active', label: t('logs.char.active'), skills: skills.filter((s) => s.category === 'Active') },
@@ -22,7 +33,7 @@
 				<li
 					class:locked
 					class:missing={s.equipped && !s.learned}
-					title="{s.name} · {t('logs.char.level', { n: s.level })}{s.equipped && !s.learned ? ` – ${t('logs.char.notLearned')}` : ''}"
+					title={title(s)}
 				>
 					<span class="icon">
 						{#if s.icon}<img src={s.icon} alt="" width="52" height="52" loading="lazy" referrerpolicy="no-referrer" />{/if}
@@ -36,6 +47,7 @@
 						{#if g.key === 'stigma' && s.equipped && s.learned}<span class="equip">E</span>{/if}
 					</span>
 					<span class="name">{s.name}</span>
+					{#if s.share !== undefined}<span class="share num">{Math.round(s.share * 100)} %</span>{/if}
 				</li>
 			{/each}
 		</ul>
@@ -59,6 +71,11 @@
 		grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
 		gap: 12px 8px;
 	}
+	.share {
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--game-gold);
+	}
 	li {
 		display: flex;
 		flex-direction: column;
@@ -72,7 +89,7 @@
 		height: 56px;
 		border-radius: 12px;
 		border: 2px solid var(--edge);
-		background: rgba(0, 0, 0, 0.35);
+		background: var(--shade);
 		display: flex;
 		align-items: center;
 		justify-content: center;

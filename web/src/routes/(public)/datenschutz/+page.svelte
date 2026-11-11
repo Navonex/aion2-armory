@@ -15,6 +15,8 @@
 <article class="glass pad legal-page">
 	{#if i18n.lang === 'de'}
 		<h1>Datenschutzerklärung</h1>
+		<p class="dim">Stand: November 2026</p>
+
 		<h2>1. Verantwortlich</h2>
 		<OperatorAddress operator={data.info.operator} />
 		<p>
@@ -45,10 +47,18 @@
 			Kampfkraft und Gegenstandsstufe als Verlauf. Das wird gelöscht, wenn der Charakter ausgetragen wird.
 			Ein Vergleich lässt sich per Link teilen: gespeichert werden der Armory-Charakter sowie Name und Server
 			des anderen Charakters, den die Armory beim Öffnen neu von der AION-2-Website holt, ohne ihn zu
-			speichern. Der Build-Check holt auf Knopfdruck die Rangliste von Abyss Logs (abysslogs.com) und die
-			öffentlichen Charakterseiten der besten Spieler; gespeichert wird nur die Auswertung, nicht deren Namen
-			oder Daten. Geteilte Links gelten, bis sie zurückgezogen werden; Suchmaschinen werden gebeten, sie
+			speichern. Geteilte Links gelten, bis sie zurückgezogen werden; Suchmaschinen werden gebeten, sie
 			nicht aufzunehmen. Zweck ist die gemeinsame Auswertung in der Gilde (Art. 6 Abs. 1 lit. f DSGVO).
+		</p>
+		<p>
+			Für die BiS-Listen und die Bewertung der Ausrüstung sammelt die Armory über den Tag verteilt Ausrüstung
+			und Skills von bis zu 200 Top-Spielern je Klasse: Die Namen kommen aus der öffentlichen Rangliste von
+			Abyss Logs (abysslogs.com), Ausrüstung und Skills von den öffentlichen Charakterseiten der
+			AION-2-Website. Ein Name steht nur so lange in der Warteschlange, bis er abgerufen ist. Gespeichert
+			werden danach nur Ausrüstung und Skills unter einem nicht umkehrbaren Schlüssel (SHA-256 aus Server und
+			Charakter-ID), ohne Namen und ohne Profil; ein neuer Spieler ersetzt den ältesten der Klasse. Angezeigt
+			werden nur Anteile über alle Spieler einer Klasse. Würfelbereiche und Chancen der Gegenstände kommen von
+			MetaBot.GG (metabot.gg) und enthalten keine Personendaten.
 		</p>
 
 		<h2>5. Inhalte von fremden Servern</h2>
@@ -67,6 +77,8 @@
 		</p>
 	{:else}
 		<h1>Privacy policy</h1>
+		<p class="dim">As of November 2026 · {t('legal.germanOnly')}</p>
+
 		<h2>1. Controller</h2>
 		<OperatorAddress operator={data.info.operator} />
 		<p>
@@ -95,10 +107,17 @@
 			refreshed once a day and on demand; combat power and item level per day are kept as history. All of it
 			is deleted when the character is removed. A comparison can be shared by link: stored are the Armory
 			character plus name and server of the other character, which is fetched live when the link is opened
-			and not stored. The build check fetches the Abyss Logs leaderboard (abysslogs.com) and the public pages
-			of the top players on demand; only the evaluation is stored, not their names or data. Shared links stay
-			valid until withdrawn; search engines are asked not to index them. The purpose is shared analysis
-			within the guild (Art. 6(1)(f) GDPR).
+			and not stored. Shared links stay valid until withdrawn; search engines are asked not to index them. The
+			purpose is shared analysis within the guild (Art. 6(1)(f) GDPR).
+		</p>
+		<p>
+			For the BiS lists and the equipment rating, the Armory collects equipment and skills of up to 200 top
+			players per class throughout the day: names come from the public Abyss Logs leaderboard
+			(abysslogs.com), equipment and skills from the public character pages of the AION 2 website. A name
+			stays in the queue only until it has been fetched. After that only equipment and skills are stored
+			under a one-way key (SHA-256 of server and character ID), without name or profile; a new player
+			replaces the oldest of the class. Only shares across all players of a class are shown. Roll ranges and
+			chances of items come from MetaBot.GG (metabot.gg) and contain no personal data.
 		</p>
 
 		<h2>5. Content from other servers</h2>
@@ -128,7 +147,6 @@
 		font-size: 17px;
 		margin: 26px 0 8px;
 	}
-	p,
 	p {
 		margin: 0 0 10px;
 	}

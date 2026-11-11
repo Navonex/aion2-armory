@@ -3,6 +3,6 @@
     /api/public/…  immer ohne Passwort (geteilte Links, Impressum)
     /api/…         hinter dem Passwort, falls ARMORY_PASSWORT gesetzt ist
 """
-from . import account, armory, public
+from . import account, armory, bis, public
 
-ROUTERS = [account.router, armory.router, public.router]
+ROUTERS = [account.router, armory.router, bis.router, public.router]

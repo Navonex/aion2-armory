@@ -3,7 +3,6 @@
 Nur herausgeben, was geteilt werden darf:
     GET /api/public/info                          wer betreibt die Armory (Impressum)?
     GET /api/public/vergleich/{token}?lang=de     ein geteilter Vergleich (Teilen-Link /v/<token>)
-    GET /api/public/check/{token}                 ein geteilter Build-Check (Teilen-Link /c/<token>)
 
 Geteilte Vergleiche zeigen beide Charaktere, aber nicht, wer geteilt hat. Suchmaschinen sollen
 sie nicht aufnehmen.
@@ -15,8 +14,8 @@ from pydantic import BaseModel
 from sqlalchemy import select
 
 from ..deps import DB, SettingsDep
-from ..models import BuildCheck, Comparison
-from .armory import ComparisonOut, SharedCheck, load_comparison, load_shared_check
+from ..models import Comparison
+from .armory import ComparisonOut, load_comparison
 
 router = APIRouter(prefix="/api/public", tags=["öffentlich"])
 
@@ -38,11 +37,9 @@ async def info(settings: SettingsDep) -> Info:
     return Info(login=False, operator=settings.operator, hoster=settings.armory_hoster.strip() or None)
 
 
-
 def _not_for_search_engines(response: Response) -> None:
     response.headers["X-Robots-Tag"] = "noindex, nofollow"
     response.headers["Cache-Control"] = "no-store"
-
 
 
 @router.get("/vergleich/{token}")
@@ -53,12 +50,3 @@ async def shared_comparison(token: str, request: Request, db: DB, response: Resp
         raise HTTPException(404, "Link ungültig oder zurückgezogen")
     _not_for_search_engines(response)
     return await load_comparison(request, db, row, lang)
-
-
-@router.get("/check/{token}")
-async def shared_check(token: str, db: DB, response: Response) -> SharedCheck:
-    check = await db.scalar(select(BuildCheck).where(BuildCheck.share_token == token)) if len(token) <= 32 else None
-    if check is None or check.result is None:
-        raise HTTPException(404, "Link ungültig oder zurückgezogen")
-    _not_for_search_engines(response)
-    return await load_shared_check(db, check)

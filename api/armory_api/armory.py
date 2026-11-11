@@ -69,7 +69,7 @@ class Armory:
                 .order_by(Character.fetched_at.nulls_first()))).all())
 
     async def daily(self) -> None:
-        """Läuft neben dem Webserver, bis der Hub beendet wird."""
+        """Läuft neben dem Webserver, bis die Armory beendet wird."""
         while True:
             for character_id in await self.due():
                 try:

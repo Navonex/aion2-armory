@@ -7,7 +7,7 @@ import pytest
 
 from armory_api.aion2 import NC, NCError, NotFound, combat_power, item_level, localized, shard_of
 
-from .fake_nc import ICON, FakeNC, search_row
+from .fake_nc import ICON, FakeNC, item, search_row
 
 
 def client(fake) -> NC:
@@ -59,7 +59,8 @@ def test_momentaufnahme():
     assert data["stats"][1]["effects"] == []
     assert item_level(data) == 2554
     assert data["titles"] == {"owned": 206, "total": 297, "equipped": [
-        {"name": "Goldener Glanz", "grade": "Unique", "category": "Attack", "effects": ["Krit.-Angriffskraft +45"]}]}
+        {"name": "Goldener Glanz", "grade": "Unique", "category": "Attack", "effects": ["Krit.-Angriffskraft +45"],
+         "owned": 74, "total": 103, "collection": ["Krit.-Angriffskraft +3"]}]}
     assert data["equipment"] == [{"id": 110430050, "slot": 1, "slot_name": "MainHand", "name": "Testbogen",
                                   "grade": "Unique", "enchant": 15, "exceed": 1, "icon": ICON}]
     assert data["pet"]["name"] == "Testeule" and data["wing"]["name"] == "Testflügel"
@@ -152,9 +153,12 @@ def test_beide_sprachen_und_werte_je_gegenstand():
     assert {"de-DE", "en-US"} <= set(fake.langs)
     assert item_level(data) == 2554 and combat_power(data) == 123456
     detail = data["de"]["equipment"][0]["detail"]
-    assert detail["main"] == [{"name": "Angriffskraft", "value": "486", "extra": "146"}]
-    assert detail["sub"] == [{"name": "Mehrfachtreffer-Chance", "value": "9.1%"}]
-    assert detail["stones"][0] == {"name": "Kritischer Treffer", "value": "+6", "grade": "Legend", "icon": ICON}
+    assert detail["main"] == [{"id": "WeaponFixingDamage", "name": "Angriffskraft", "value": "486", "extra": "146",
+                              "exceed": False}]
+    assert detail["sub"] == [{"id": "AdditionalHitRate", "name": "Mehrfachtreffer-Chance", "value": "9.1%"}]
+    assert detail["soul_bind_rate"] == "100"
+    assert detail["stones"][0] == {"id": "Critical", "name": "Kritischer Treffer", "value": "+6", "grade": "Legend",
+                                   "icon": ICON}
     assert detail["godstones"][0]["desc"] == "10 % Chance auf Wind-Schaden"
     assert detail["skills"] == [{"name": "Zielpfeil", "level": 2, "icon": ICON}]
     assert detail["set"] == {"name": "Testset", "equipped": 3, "total": 5,
@@ -163,6 +167,33 @@ def test_beide_sprachen_und_werte_je_gegenstand():
     fake.calls.clear()
     run(client(fake).snapshots(2302, "abc="))
     assert "/api/character/equipment/item" not in fake.calls
+
+
+def test_gewinn_bis_zur_hoechsten_verzauberung():
+    fake = FakeNC()
+    now, top = item(), item()
+    now["maxEnchantLevel"] = top["maxEnchantLevel"] = 20
+    top["mainStats"] = [{**top["mainStats"][0], "extra": "180"}]
+    fake.items_at = {"15": now, "20": top}
+    detail = run(client(fake).item(2302, "abc=", "de", {"id": 1, "slot": 1, "enchant": 15}))
+    assert detail["max_enchant"] == 20
+    assert detail["gain"] == {"enchant": 20, "stats": [{"name": "Angriffskraft", "value": "+34"}]}
+
+
+def test_kein_gewinn_ohne_hoehere_stufe():
+    fake = FakeNC()
+    capped = item()
+    capped["maxEnchantLevel"] = 15
+    fake.items_at = {"15": capped}
+    detail = run(client(fake).item(2302, "abc=", "de", {"id": 1, "slot": 1, "enchant": 15}))
+    assert "gain" not in detail and fake.calls.count("/api/character/equipment/item") == 1
+    # Höchststufe, die NC nicht kennt (404): Werte bleiben, ohne Gewinn
+    fake = FakeNC()
+    now = item()
+    now["maxEnchantLevel"] = 20
+    fake.items_at = {"15": now, "20": 404}
+    detail = run(client(fake).item(2302, "abc=", "de", {"id": 1, "slot": 1, "enchant": 15}))
+    assert detail["main"] and detail.get("gain") is None
 
 
 def test_gegenstand_nicht_mehr_angelegt():
